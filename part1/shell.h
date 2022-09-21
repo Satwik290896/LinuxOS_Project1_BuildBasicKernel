@@ -8,6 +8,6 @@
 #include <dirent.h>
 #include <errno.h>
 
-int tokenize(char *buf, char **comm, char *arr[]);
+int tokenize(char **buf, char **comm, char *arr[]);
 void run_fork_processes(char **buf, char **comm, char *arr[]);
 void total_free(char **buf, char **comm, char *arr[]);

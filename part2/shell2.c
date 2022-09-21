@@ -177,7 +177,8 @@ void run_fork_processes(char **buf, char **comm, char *arr[])
 void alloc_mem(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4)
 {
 	int SZ = N*sizeof(char);
-	*s = mmap(NULL, SZ, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
+	*s = mmap(NULL, SZ, PROT_READ|PROT_WRITE,
+			MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
 	if (*s == MAP_FAILED)
 		die("Malloc Allocation failed", fr1, fr2, fr3, fr4);
 
