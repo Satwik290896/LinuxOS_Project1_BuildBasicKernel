@@ -87,7 +87,7 @@ int main(void)
 int tokenize(char *buf, char **comm, char *arr[])
 {
 	int temp = 0;
-	const char s[2] = " ";
+	static const char s[2] = " ";
 	char *token = NULL;
 	int i = 0;
 
@@ -146,9 +146,6 @@ void total_free(char **buf, char **comm, char *arr[])
 	int i = 0;
 
 	if (comm != NULL) {
-		/*printf("Freeing Comm \n");
-		 */
-
 		free(*comm);
 		*comm = NULL;
 	}
