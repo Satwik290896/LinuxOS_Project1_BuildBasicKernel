@@ -65,4 +65,6 @@ When you read bash run.sh, you may see that the two main files to create floppy.
 2. main.c - Segment base is set here as - "0xb800" and the code to display "hello, world" is also been written.
 
 
+# Some Revelations
+I did push more than 40 commits, but unfortunately, my repository got corrupted somehow and need o force push it - which remove all of the github history related to the repository
 
