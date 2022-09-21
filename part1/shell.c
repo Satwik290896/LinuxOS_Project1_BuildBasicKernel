@@ -1,20 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <dirent.h>
-#include <errno.h>
+#include "shell.h"
 
 #define NUM_ARG 1000
 #define BUF_SIZE 4096
 
-
-int tokenize(char *buf, char **comm, char *arr[]);
-void run_fork_processes(char **buf, char **comm, char *arr[]);
-void total_free(char **buf, char **comm, char *arr[]);
 
 static void die(const char *s, char **buf, char **comm, char *arr[])
 {
