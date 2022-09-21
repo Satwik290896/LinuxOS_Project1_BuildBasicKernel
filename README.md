@@ -19,7 +19,7 @@ Go to Part1 folder and execute the following commands to run shell.c
 
 > ./w4118_sh
 
-##Contents of part1
+## Contents of part1
 1. Makefile - to link all the source codes
 2. shell.c - Source code
 3. shell.h - Header file
@@ -46,7 +46,7 @@ Go to Part2 folder and execute the following commands to run shell2.c
 
 > ./w4118_sh2
 
-##Contents of part2
+## Contents of part2
 1. Makefile - to link all the source codes
 2. shell2.c - Source code
 3. shell2.h - Header file
