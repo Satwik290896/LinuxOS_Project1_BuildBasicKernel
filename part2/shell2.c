@@ -15,11 +15,13 @@
 
 
 void fill_buffer(char **buf, char *arr[]);
-int tokenize(char *buf, char **comm, char *arr[]);
+int tokenize(char **buf, char **comm, char *arr[]);
 void run_fork_processes(char **buf, char **comm, char *arr[]);
-void total_free(char **buf, char **comm, char *arr[]);
+void allocate_memory(char **string, int nC, char **fr1, char **fr2, char **fr3, char **fr4);
+void free_memory(char **string, int nC);
+void total_free(char **buf, char **comm, char *arr[], char **fr4);
 
-static void die(const char *s, char **buf, char **comm, char *arr[])
+static void die(const char *s, char **buf, char **comm, char *arr[], char **fr4)
 {
 	if(write(1, "error: ", 7) != 7)
 		write(2, "error: Problem in writing in STDOUT\n",50);
@@ -30,7 +32,7 @@ static void die(const char *s, char **buf, char **comm, char *arr[])
 	if(write(1,"\n",1) != 1)
 		write(2, "error: Problem in writing to STDOUT\n", 50);
 
-	total_free(buf, comm, arr);
+	total_free(buf, comm, arr, fr4);
 	exit(1); 
 }
 
@@ -51,15 +53,12 @@ static void just_print(const char *s)
 int main(void)
 {
 	char    *buf = NULL;
-	pid_t	pid;
 	char	*arr[NUM_ARG] = {NULL};
-	char	*token = NULL;
 	char 	*comm = NULL;
 	int total_arg = 0;
 
 	while (1){
 		total_arg = 0;
-	 	token = NULL;
 	 	comm = NULL;
 		
 		fill_buffer(&buf, arr);
@@ -67,15 +66,14 @@ int main(void)
         	if (buf[strlen(buf) - 1] == '\n')
             		buf[strlen(buf) - 1] = 0; // replace newline with '\0'
 		
-		printf("buf: %s\n", buf);
-		total_arg = tokenize(buf, &comm, arr);
+		total_arg = tokenize(&buf, &comm, arr);
 
 		if (total_arg > NUM_ARG) {
 			just_print("Accepting only 1000 Arguments!");
-			total_free(&buf, &comm, arr);
+			total_free(&buf, &comm, arr, NULL);
 			continue;
 		} else if (total_arg == 0) {
-			total_free(&buf, NULL, arr);
+			total_free(&buf, NULL, arr, NULL);
 			continue;
 		}
         
@@ -83,14 +81,14 @@ int main(void)
 	    		break;
 	 	} else if ((!strcmp(comm, "cd")) && (total_arg > 2)) {
 			just_print("Too many arguments");
-			total_free(&buf, &comm, arr);
+			total_free(&buf, &comm, arr, NULL);
 		} else if ((!strcmp(comm, "cd")) && (arr[1] != NULL)) {
 			if (chdir(arr[1]))
 				just_print(strerror(errno));
-			total_free(&buf, &comm, arr);
+			total_free(&buf, &comm, arr, NULL);
 		} else {
 			run_fork_processes(&buf, &comm, arr);
-			total_free(&buf, &comm, arr);
+			total_free(&buf, &comm, arr, NULL);
 	  	}
     	}
     	
@@ -113,49 +111,36 @@ void fill_buffer(char **buf, char *arr[])
 
 	while(1)
 	{
-		tbuf = mmap(NULL, buffs*sizeof(char), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
-		if(tbuf == MAP_FAILED)
-	   		die("Malloc Allocation failed(tbuf)", buf, NULL, arr);
-	   		
+		allocate_memory(&tbuf, buffs, buf, NULL, arr, NULL);	
 	 	read(0, tbuf, buffs);
 
-		printf("i: %d\n", i);
 		if(i == 0){
-		        *buf = mmap(NULL, buffs*sizeof(char), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
-		        if(*buf == MAP_FAILED){
-		        	munmap(tbuf,buffs*sizeof(char));
-	   			die("Malloc(buf) Allocation failed", NULL, NULL, arr);
-	   		}
+			allocate_memory(buf, buffs, NULL, NULL, arr, &tbuf);
 			strcpy(*buf,tbuf);
 		} else {
-			B = mmap(NULL, (i+1)*buffs*sizeof(char), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
-			if(B == MAP_FAILED){
-				munmap(tbuf,buffs*sizeof(char));
-	   			die("Malloc(B) Allocation failed", buf, NULL, arr);
-	   		}
+			allocate_memory(&B, (i)*buffs + strlen(tbuf), buf, NULL, arr, &tbuf);
+			
 	   		strcpy(B,*buf);
 			strcat(B+(i*buffs),tbuf);
-			munmap(*buf,strlen(*buf)*sizeof(char));
-			*buf = mmap(NULL, (i+1)*buffs*sizeof(char), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
-			if(*buf == MAP_FAILED){
-				munmap(tbuf,buffs*sizeof(char));
-	  			die("Malloc(buf) Allocation failed", &B, NULL, arr);
-	   		}
+			
+			free_memory(buf, strlen(*buf));
+			allocate_memory(buf, (i)*buffs + strlen(tbuf), &B, NULL, arr, &tbuf);
+			
 			strcpy(*buf,B);
-			munmap(B,strlen(B)*sizeof(char));
+			free_memory(&B, strlen(B));
 		}
 			
 		if(tbuf[strlen(tbuf)-1] == '\n'){
-			munmap(tbuf,buffs*sizeof(char));
+			free_memory(&tbuf, buffs);
 			break;
 		}
 		i++;
-		munmap(tbuf,buffs*sizeof(char));
+		free_memory(&tbuf, buffs);
 		
 	}	
 }
 
-int tokenize(char *buf, char **comm, char *arr[])
+int tokenize(char **buf, char **comm, char *arr[])
 {
 	int temp = 0;
 	const char s[2] = " ";
@@ -165,19 +150,19 @@ int tokenize(char *buf, char **comm, char *arr[])
 	for (temp = 0; temp < NUM_ARG; temp++)
 		arr[temp] = NULL;
 
-	token = strtok(buf, s);
+	token = strtok(*buf, s);
 
 	while (token != NULL) {
 		i++;
 		if (i > NUM_ARG)
 			break;
 
-
-		arr[i-1] = (char *)malloc(strlen(token)*sizeof(char));
+		
+		allocate_memory(&arr[i-1], strlen(token), buf, comm, arr, NULL);
 		strcpy(arr[i-1], token);
 
 		if (i == 1) {
-			*comm = (char *)malloc(strlen(token)*sizeof(char));
+			allocate_memory(comm, strlen(token), buf, comm, arr, NULL);
 			strcpy(*comm, token);
 		}
 		token = strtok(NULL, s);
@@ -193,36 +178,47 @@ void run_fork_processes(char **buf, char **comm, char *arr[])
 
 	pid = fork();
 	if (pid < 0)
-		die("fork error", buf, comm, arr);
+		die("fork error", buf, comm, arr, NULL);
 	else if (pid == 0) {
 		/* child process */
 		execv(*comm, arr);
-		die(strerror(errno), buf, comm, arr);
+		die(strerror(errno), buf, comm, arr, NULL);
 	} else {
 		/* parent process */
 		if (waitpid(pid, &status, 0) != pid)
-			die("waitpid failed", buf, comm, arr);
+			die("waitpid failed", buf, comm, arr, NULL);
 	}
 }
 
-void total_free(char **buf, char **comm, char *arr[])
+void allocate_memory(char **string, int nC, char **fr1, char **fr2, char **fr3, char **fr4)
+{
+	*string = mmap(NULL, nC*sizeof(char), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
+	if(*string == MAP_FAILED)
+		die("Malloc Allocation failed", fr1, fr2, fr3, fr4);
+
+}
+
+void free_memory(char **string, int nC)
+{
+	munmap(*string, nC*sizeof(char));
+	*string = NULL;
+}
+
+void total_free(char **buf, char **comm, char *arr[], char **fr4)
 {
 	int i = 0;
 
-	if (comm != NULL) {
-		munmap(*comm, strlen(*comm)*sizeof(char));
-		*comm = NULL;
-	}
+	if (comm != NULL)
+		free_memory(comm, strlen(*comm));
 
 	for (i = 0; i < NUM_ARG; i++) {
-		if (arr[i] != NULL) {
-			munmap(arr[i], strlen(arr[i])*sizeof(char));
-			arr[i] = NULL;
-		}
+		if (arr[i] != NULL)
+			free_memory(&arr[i], strlen(arr[i]));
 	}
 
-	if (buf != NULL) {
-		munmap(*buf, strlen(*buf)*sizeof(char));
-		*buf = NULL;
-	}
+	if (buf != NULL)
+		free_memory(buf, strlen(*buf));
+	
+	if(fr4 != NULL)
+		free_memory(fr4, BUF_SIZE);
 }
