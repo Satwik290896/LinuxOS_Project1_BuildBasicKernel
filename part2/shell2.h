@@ -10,7 +10,7 @@
 #include <errno.h>
 
 
-void fill_buffer(char **buf, char *arr[]);
+void fill_buffer(char **buf, char *arr[], int ref);
 int tokenize(char **buf, char **comm, char *arr[]);
 void run_fork_processes(char **buf, char **comm, char *arr[]);
 void _alloc(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4);

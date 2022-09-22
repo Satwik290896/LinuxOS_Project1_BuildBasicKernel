@@ -71,7 +71,7 @@ int main(void)
 		total_arg = 0;
 		comm = NULL;
 
-		fill_buffer(&buf, arr);
+		fill_buffer(&buf, arr, ref);
 
 		if (buf == NULL)
 			continue;
@@ -118,7 +118,7 @@ int main(void)
 /* fill_buffer() API will take care of reading the input - even if the
  * input buffer is of size more than BUFF_SIZE
  */
-void fill_buffer(char **buf, char *arr[])
+void fill_buffer(char **buf, char *arr[], int ref)
 {
 	/* Temporary buffer to store 4096 bytes of input */
 	char    *tbuf = NULL;
@@ -132,9 +132,11 @@ void fill_buffer(char **buf, char *arr[])
 	int	TotSiz = 0;
 	int	off = 0;
 
-	if (write(1, "$", 1) != 1) {
-		write(2, "error: Problem in writing to STDOUT\n", 50);
-		exit(1);
+	if (ref == 1) {
+		if (write(1, "$", 1) != 1) {
+			write(2, "error: Problem in writing to STDOUT\n", 50);
+			exit(1);
+		}
 	}
 
 	while (1) {
