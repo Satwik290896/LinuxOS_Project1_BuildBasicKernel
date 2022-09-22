@@ -1,7 +1,7 @@
 #include "shell2.h"
 
 /* Maximum umber of arguments that can be given */
-#define NUM_ARG 1000
+#define NUM_ARG 10000
 /* This global MACRO will be used to allocate memory while reading.
  * Defined to assume the amount of bytes that can be given to buffer.
  * But the input size can be more than this. So, we wrote
@@ -77,7 +77,7 @@ int main(void)
 		total_arg = tokenize(&buf, &comm, arr);
 
 		if (total_arg > NUM_ARG) {
-			just_print("Accepting only 1000 Arguments!");
+			just_print("Accepting only 10000 Arguments!");
 			total_free(&buf, &comm, arr, NULL);
 			continue;
 		} else if (total_arg == 0) {
@@ -118,7 +118,7 @@ void fill_buffer(char **buf, char *arr[])
 	/* iterator to read big size data */
 	int	i = 0;
 	/* Used while increasing the buf size */
-	int	TotSiz = 0;
+	size_t	TotSiz = 0;
 
 	if (write(1, "$", 1) != 1) {
 		write(2, "error: Problem in writing to STDOUT\n", 50);
@@ -126,22 +126,22 @@ void fill_buffer(char **buf, char *arr[])
 	}
 
 	while (1) {
-		alloc_mem(&tbuf, buffs, buf, NULL, arr, NULL);
+		_alloc(&tbuf, buffs, buf, NULL, arr, NULL);
 		if (read(0, tbuf, buffs) == -1)
 			die(strerror(errno), buf, NULL, arr, NULL);
 
 		if (i == 0) {
-			alloc_mem(buf, buffs, NULL, NULL, arr, &tbuf);
+			_alloc(buf, buffs, NULL, NULL, arr, &tbuf);
 			strcpy(*buf, tbuf);
 		} else {
 			TotSiz = (i)*buffs + strlen(tbuf);
-			alloc_mem(&B, TotSiz, buf, NULL, arr, &tbuf);
+			_alloc(&B, TotSiz, buf, NULL, arr, &tbuf);
 
 			strcpy(B, *buf);
 			strcat(B+(i*buffs), tbuf);
 
 			free_memory(buf, strlen(*buf));
-			alloc_mem(buf, TotSiz, &B, NULL, arr, &tbuf);
+			_alloc(buf, TotSiz, &B, NULL, arr, &tbuf);
 
 			strcpy(*buf, B);
 			free_memory(&B, strlen(B));
@@ -183,11 +183,11 @@ int tokenize(char **buf, char **comm, char *arr[])
 			break;
 
 
-		alloc_mem(&arr[i-1], strlen(token), buf, comm, arr, NULL);
+		_alloc(&arr[i-1], strlen(token), buf, comm, arr, NULL);
 		strcpy(arr[i-1], token);
 
 		if (i == 1) {
-			alloc_mem(comm, strlen(token), buf, comm, arr, NULL);
+			_alloc(comm, strlen(token), buf, comm, arr, NULL);
 			strcpy(*comm, token);
 		}
 		token = strtok(NULL, s);
@@ -223,12 +223,12 @@ void run_fork_processes(char **buf, char **comm, char *arr[])
 }
 
 
-/* alloc_mem is used to allocate memory of size N characters.
+/* _alloc() is used to allocate memory of size N characters.
  * If allocation failed, we call die() with freeing up all allocated resources
  */
-void alloc_mem(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4)
+void _alloc(char **s, size_t N, char **fr1, char **fr2, char **fr3, char **fr4)
 {
-	int SZ = N*sizeof(char);
+	size_t	SZ = N*sizeof(char);
 	*s = mmap(NULL, SZ, PROT_READ|PROT_WRITE,
 			MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
 	if (*s == MAP_FAILED)
@@ -240,7 +240,7 @@ void alloc_mem(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4)
 /* free_memory() is used to free-up the memory
  * of string upto nC characters
  */
-void free_memory(char **string, int nC)
+void free_memory(char **string, size_t nC)
 {
 	munmap(*string, nC*sizeof(char));
 	*string = NULL;

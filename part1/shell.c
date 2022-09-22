@@ -1,7 +1,7 @@
 #include "shell.h"
 
 /* Maximum umber of arguments that can be given */
-#define NUM_ARG 1000
+#define NUM_ARG 10000
 /* This global MACRO will not be used anywhere.
  * Defined to assume the amount of bytes that can be given to buffer
  */
@@ -54,7 +54,8 @@ int main(void)
 		total_arg = tokenize(&buf, &comm, arr);
 
 		if (total_arg > NUM_ARG) {
-			printf("error: %s\n", "Accepting only 1000 Arguments!");
+			printf("error: %s\n",
+				"Accepting only 10000 Arguments!");
 			total_free(&buf, &comm, arr);
 			continue;
 		} else if (total_arg == 0) {
