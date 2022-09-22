@@ -7,7 +7,7 @@
  * But the input size can be more than this. So, we wrote
  * fill_buffer() API to take care of these nuances by playing with pointers.
  */
-#define BUF_SIZE 4096
+#define BUF_SIZE 1024
 
 
 
@@ -63,6 +63,9 @@ int main(void)
 	char	*comm = NULL;
 	/* stores the number of args in the input */
 	int	total_arg = 0;
+	int	ref;
+
+	ref = isatty(0);
 
 	while (1) {
 		total_arg = 0;
@@ -70,8 +73,11 @@ int main(void)
 
 		fill_buffer(&buf, arr);
 
+		if (buf == NULL)
+			continue;
+
 		/* replace newline with '\0' */
-		if (buf[strlen(buf) - 1] == '\n')
+		if (buf[strlen(buf)-1] == '\n')
 			buf[strlen(buf) - 1] = 0;
 
 		total_arg = tokenize(&buf, &comm, arr);
@@ -96,8 +102,13 @@ int main(void)
 			total_free(&buf, &comm, arr, NULL);
 		} else {
 			run_fork_processes(&buf, &comm, arr);
+			if (ref == 0) {
+				total_free(&buf, &comm, arr, NULL);
+				break;
+			}
 			total_free(&buf, &comm, arr, NULL);
 		}
+
 	}
 
 	return 0;
@@ -118,7 +129,8 @@ void fill_buffer(char **buf, char *arr[])
 	/* iterator to read big size data */
 	int	i = 0;
 	/* Used while increasing the buf size */
-	size_t	TotSiz = 0;
+	int	TotSiz = 0;
+	int	off = 0;
 
 	if (write(1, "$", 1) != 1) {
 		write(2, "error: Problem in writing to STDOUT\n", 50);
@@ -127,8 +139,11 @@ void fill_buffer(char **buf, char *arr[])
 
 	while (1) {
 		_alloc(&tbuf, buffs, buf, NULL, arr, NULL);
-		if (read(0, tbuf, buffs) == -1)
+		off = read(0, tbuf, buffs);
+		if (off == -1)
 			die(strerror(errno), buf, NULL, arr, NULL);
+		else if (off == 0)
+			break;
 
 		if (i == 0) {
 			_alloc(buf, buffs, NULL, NULL, arr, &tbuf);
@@ -147,7 +162,7 @@ void fill_buffer(char **buf, char *arr[])
 			free_memory(&B, strlen(B));
 		}
 
-		if (tbuf[strlen(tbuf)-1] == '\n') {
+		if ((tbuf[strlen(tbuf)-1] == '\n')) {
 			free_memory(&tbuf, buffs);
 			break;
 		}
@@ -226,9 +241,9 @@ void run_fork_processes(char **buf, char **comm, char *arr[])
 /* _alloc() is used to allocate memory of size N characters.
  * If allocation failed, we call die() with freeing up all allocated resources
  */
-void _alloc(char **s, size_t N, char **fr1, char **fr2, char **fr3, char **fr4)
+void _alloc(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4)
 {
-	size_t	SZ = N*sizeof(char);
+	int	SZ = N*sizeof(char);
 	*s = mmap(NULL, SZ, PROT_READ|PROT_WRITE,
 			MAP_PRIVATE|MAP_ANONYMOUS, 0, 0);
 	if (*s == MAP_FAILED)
@@ -240,7 +255,7 @@ void _alloc(char **s, size_t N, char **fr1, char **fr2, char **fr3, char **fr4)
 /* free_memory() is used to free-up the memory
  * of string upto nC characters
  */
-void free_memory(char **string, size_t nC)
+void free_memory(char **string, int nC)
 {
 	munmap(*string, nC*sizeof(char));
 	*string = NULL;

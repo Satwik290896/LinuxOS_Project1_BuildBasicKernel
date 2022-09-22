@@ -13,6 +13,6 @@
 void fill_buffer(char **buf, char *arr[]);
 int tokenize(char **buf, char **comm, char *arr[]);
 void run_fork_processes(char **buf, char **comm, char *arr[]);
-void _alloc(char **s, size_t N, char **fr1, char **fr2, char **fr3, char **fr4);
-void free_memory(char **string, size_t nC);
+void _alloc(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4);
+void free_memory(char **string, int nC);
 void total_free(char **buf, char **comm, char *arr[], char **fr4);
