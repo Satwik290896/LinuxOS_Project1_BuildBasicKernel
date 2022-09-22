@@ -2,16 +2,17 @@
 
 /* Maximum umber of arguments that can be given */
 #define NUM_ARG 1000
-/* This global MACRO will not be used anywhere. 
- * Defined to assume the amount of bytes that can be given to buffer */
+/* This global MACRO will not be used anywhere.
+ * Defined to assume the amount of bytes that can be given to buffer
+ */
 #define BUF_SIZE 4096
 
 
 
 
-/* die() function will kill the process after 
+/* die() function will kill the process after
  * freeing every dynamically allocated memory
- */ 
+ */
 static void die(const char *s, char **buf, char **comm, char *arr[])
 {
 	total_free(buf, comm, arr);
@@ -20,15 +21,16 @@ static void die(const char *s, char **buf, char **comm, char *arr[])
 }
 
 
-/* main() will run first 
+/* main() will run first
  * in every source code
- */ 
+ */
 int main(void)
 {
 	/* Buffer to store the input */
 	char	*buf = NULL;
-	/* buffs passed to getline() which stores 
-	 * number of allocated bytes for buf */
+	/* buffs passed to getline() which stores
+	 * number of allocated bytes for buf
+	 */
 	size_t	buffs;
 	/* arr stores the arguments */
 	char	*arr[NUM_ARG] = {NULL};
@@ -80,8 +82,9 @@ int main(void)
 }
 
 
-/* func tokenize() - will do the same purpose 
- * as mentioned by its name. It will tokenize the input */
+/* func tokenize() - will do the same purpose
+ * as mentioned by its name. It will tokenize the input
+ */
 int tokenize(char **buf, char **comm, char *arr[])
 {
 	/* initialize arr using temp */
@@ -90,8 +93,7 @@ int tokenize(char **buf, char **comm, char *arr[])
 	static const char s[2] = " ";
 	/* To store tokens temporarily */
 	char *token = NULL;
-	/* iterator - returned as the 
-	 * number of args in the input */
+	/* iterator - returned as the number of args in the input */
 	int i = 0;
 
 	for (temp = 0; temp < NUM_ARG; temp++)
@@ -105,7 +107,7 @@ int tokenize(char **buf, char **comm, char *arr[])
 			die("Malloc allocation failed", buf, comm, arr);
 		strcpy(*comm, token);
 	}
-	
+
 	while (token != NULL) {
 		i++;
 		if (i > NUM_ARG)
@@ -114,7 +116,7 @@ int tokenize(char **buf, char **comm, char *arr[])
 		arr[i-1] = (char *)malloc(strlen(token)*sizeof(char));
 		if (arr[i-1] == NULL)
 			die("Malloc allocation for arr failed", buf, comm, arr);
-		
+
 		strcpy(arr[i-1], token);
 
 		token = strtok(NULL, s);
@@ -124,9 +126,10 @@ int tokenize(char **buf, char **comm, char *arr[])
 }
 
 
-/* Create a child process and execute 
- * the command given by the 
- * input - stored in the buf, arr and comm */
+/* Create a child process and execute
+ * the command given by the
+ * input - stored in the buf, arr and comm
+ */
 void run_fork_processes(char **buf, char **comm, char *arr[])
 {
 	/* stores the pid of the fork() */
@@ -149,8 +152,9 @@ void run_fork_processes(char **buf, char **comm, char *arr[])
 }
 
 
-/* Called when you want to free 
- * all the dynamically allocated memory */
+/* Called when you want to free
+ * all the dynamically allocated memory
+ */
 void total_free(char **buf, char **comm, char *arr[])
 {
 	/* iterator for arr */

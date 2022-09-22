@@ -2,10 +2,10 @@
 
 /* Maximum umber of arguments that can be given */
 #define NUM_ARG 1000
-/* This global MACRO will be used to allocate memory while reading. 
+/* This global MACRO will be used to allocate memory while reading.
  * Defined to assume the amount of bytes that can be given to buffer.
- * But the input size can be more than this. So, we wrote 
- * fill_buffer() API to take care of these nuances by playing with pointers. 
+ * But the input size can be more than this. So, we wrote
+ * fill_buffer() API to take care of these nuances by playing with pointers.
  */
 #define BUF_SIZE 4096
 
@@ -14,9 +14,9 @@
 
 
 
-/* die() function will kill the process after 
+/* die() function will kill the process after
  * freeing every dynamically allocated memory
- */ 
+ */
 static void die(const char *s, char **buf, char **comm, char *arr[], char **fr4)
 {
 	if (write(1, "error: ", 7) != 7)
@@ -34,7 +34,7 @@ static void die(const char *s, char **buf, char **comm, char *arr[], char **fr4)
 
 
 /* just_print() will be used to print the error,
- * but unlike die(), the API will not kill the process 
+ * but unlike die(), the API will not kill the process
  */
 static void just_print(const char *s)
 {
@@ -50,9 +50,9 @@ static void just_print(const char *s)
 }
 
 
-/* main() will run first 
+/* main() will run first
  * in every source code
- */ 
+ */
 int main(void)
 {
 	/* Buffer to store the input */
@@ -104,8 +104,8 @@ int main(void)
 }
 
 
-/* fill_buffer() API will take care of reading the input - even if the 
- * input buffer is of size more than BUFF_SIZE 
+/* fill_buffer() API will take care of reading the input - even if the
+ * input buffer is of size more than BUFF_SIZE
  */
 void fill_buffer(char **buf, char *arr[])
 {
@@ -158,8 +158,9 @@ void fill_buffer(char **buf, char *arr[])
 }
 
 
-/* func tokenize() - will do the same purpose 
- * as mentioned by its name. It will tokenize the input */
+/* func tokenize() - will do the same purpose
+ * as mentioned by its name. It will tokenize the input
+ */
 int tokenize(char **buf, char **comm, char *arr[])
 {
 	/* initialize arr using temp */
@@ -168,8 +169,7 @@ int tokenize(char **buf, char **comm, char *arr[])
 	static const char s[2] = " ";
 	/* To store tokens temporarily */
 	char	*token = NULL;
-	/* iterator - returned as the 
-	 * number of args in the input */
+	/* iterator - returned as the number of args in the input */
 	int	i = 0;
 
 	for (temp = 0; temp < NUM_ARG; temp++)
@@ -197,9 +197,10 @@ int tokenize(char **buf, char **comm, char *arr[])
 }
 
 
-/* Create a child process and execute 
- * the command given by the 
- * input - stored in the buf, arr and comm */
+/* Create a child process and execute
+ * the command given by the
+ * input - stored in the buf, arr and comm
+ */
 void run_fork_processes(char **buf, char **comm, char *arr[])
 {
 	/* stores the pid of the fork() */
@@ -223,7 +224,8 @@ void run_fork_processes(char **buf, char **comm, char *arr[])
 
 
 /* alloc_mem is used to allocate memory of size N characters.
- * If allocation failed, we call die() with freeing up all allocated resources */
+ * If allocation failed, we call die() with freeing up all allocated resources
+ */
 void alloc_mem(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4)
 {
 	int SZ = N*sizeof(char);
@@ -235,8 +237,9 @@ void alloc_mem(char **s, int N, char **fr1, char **fr2, char **fr3, char **fr4)
 }
 
 
-/* free_memory() is used to free-up the memory 
- * of string upto nC characters */
+/* free_memory() is used to free-up the memory
+ * of string upto nC characters
+ */
 void free_memory(char **string, int nC)
 {
 	munmap(*string, nC*sizeof(char));
@@ -244,8 +247,9 @@ void free_memory(char **string, int nC)
 }
 
 
-/* Called when you want to free 
- * all the dynamically allocated memory */
+/* Called when you want to free
+ * all the dynamically allocated memory
+ */
 void total_free(char **buf, char **comm, char *arr[], char **fr4)
 {
 	int i = 0;
